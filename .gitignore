@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & Temporary files
+*.log
+.system_generated/
+.gemini/
+
+# Model Checkpoints & Large Binaries (> 100MB blocked by GitHub)
+*.pth
+*.pt
+*.onnx
+*.bin
+*.h5
+
+# Optional: Large data files (uncomment if dataset > 100MB)
+# data/train/
+# data/val/
+# data/test/
+
