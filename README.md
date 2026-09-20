@@ -152,6 +152,19 @@ Medical AI requires trust and transparency. This system uses **Grad-CAM (Gradien
 - **Deep Learning**: PyTorch, Torchvision, CUDA (optional CPU support)
 - **Computer Vision**: OpenCV, PIL, Scikit-Image
 - **Explainability**: Custom PyTorch Grad-CAM Hook Engine
-- **Web UI**: Streamlit, Pandas, Matplotlib, Seaborn
+- **Web UI**: Streamlit, Plotly, Pandas, Matplotlib, Seaborn
 - **Backend API**: FastAPI, Uvicorn, Pydantic
+
+---
+
+## 📚 Academic & Research References
+
+For a full list of scientific citations, research papers, and dataset benchmarks, see **[REFERENCES.md](REFERENCES.md)**:
+- **MURA Benchmark**: Stanford ML Group (*Rajpurkar et al., 2017*)
+- **FracAtlas Dataset**: Nature Scientific Data (*Iftekhar et al., 2023*)
+- **Grad-CAM Explainability**: IEEE ICCV / IJCV (*Selvaraju et al., 2020*)
+- **ResNet Architecture**: IEEE CVPR (*He et al., 2016*)
+- **DenseNet Architecture**: IEEE CVPR (*Huang et al., 2017*)
+- **CLAHE Contrast Filter**: Graphics Gems IV (*Zuiderveld, 1994*)
+
 

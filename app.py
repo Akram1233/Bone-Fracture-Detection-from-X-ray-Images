@@ -1,7 +1,6 @@
 """
 Bone Fracture AI Diagnostic Studio - X-Ray AI Engine
-Advanced Clinical Vision Platform with PACS Image Workbench, Interactive Split Slider,
-Audio Readout, and Official Printable Hospital Certification.
+Ultra-Modern, High-Performance Clinical Vision Platform with Explainable AI.
 """
 
 import os
@@ -14,20 +13,12 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 import streamlit as st
-import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import plotly.express as px
 
 from src.predictor import BoneFracturePredictor
 from src.gradcam import COLORMAP_DICT
-from src.utils import (
-    generate_dataset_structure,
-    apply_clahe,
-    adjust_radiograph_properties,
-    pil_to_base64,
-    get_image_comparison_slider_html,
-    generate_printable_hospital_report_html
-)
+from src.utils import generate_dataset_structure
 from src.train import train_model
 from src.evaluate import evaluate_model
 
@@ -46,13 +37,13 @@ def get_logo_base64():
 
 # Page Configuration
 st.set_page_config(
-    page_title="X-Ray AI Engine | Clinical Diagnostic Studio",
+    page_title="X-Ray AI Engine | Bone Fracture Diagnostic Studio",
     page_icon=logo_image if logo_image else "🩻",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom High-End Luxury Medical Styling (Glassmorphism, Glowing Badges, Radiology Console)
+# Custom High-End Luxury Medical Styling (Glassmorphism & Glowing Accents)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -64,12 +55,12 @@ st.markdown("""
     /* Gradient Brand Header */
     .hero-container {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 58, 138, 0.85) 50%, rgba(15, 23, 42, 0.95) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.35);
+        border: 1px solid rgba(59, 130, 246, 0.3);
         border-radius: 16px;
         padding: 24px 32px;
         margin-bottom: 24px;
-        box-shadow: 0 12px 35px -10px rgba(2, 132, 199, 0.35);
-        backdrop-filter: blur(14px);
+        box-shadow: 0 10px 30px -10px rgba(2, 132, 199, 0.3);
+        backdrop-filter: blur(12px);
     }
     
     .hero-title {
@@ -126,35 +117,35 @@ st.markdown("""
         50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.5); }
     }
 
-    /* PACS Console Card */
-    .pacs-card {
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(56, 189, 248, 0.3);
+    /* Glassmorphism Metric Card */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.15);
         border-radius: 12px;
         padding: 16px;
-        margin-bottom: 16px;
+        backdrop-filter: blur(8px);
+        margin-bottom: 12px;
     }
 
-    /* Triage Priority Tag */
-    .triage-tag-urgent {
-        background: #DC2626;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 12px;
-        display: inline-block;
-        box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+    /* Happy Celebration Box */
+    .happy-box {
+        background: linear-gradient(135deg, #064E3B 0%, #065F46 100%);
+        border: 1px solid #34D399;
+        border-radius: 12px;
+        padding: 18px 24px;
+        color: #ECFDF5;
+        margin-top: 14px;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
     }
-    .triage-tag-routine {
-        background: #059669;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 12px;
-        display: inline-block;
-        box-shadow: 0 0 12px rgba(5, 150, 105, 0.4);
+
+    .alert-box {
+        background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%);
+        border: 1px solid #F87171;
+        border-radius: 12px;
+        padding: 18px 24px;
+        color: #FEF2F2;
+        margin-top: 14px;
+        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -179,7 +170,7 @@ def create_gauge_chart(prob_fracture: float, confidence: float, is_fractured: bo
         mode="gauge+number+delta",
         value=prob_fracture * 100,
         number={'suffix': "%", 'font': {'size': 32, 'color': color, 'family': "Plus Jakarta Sans"}},
-        title={'text': "Fracture Risk Index", 'font': {'size': 15, 'color': "#94A3B8"}},
+        title={'text': "Fracture Risk Index", 'font': {'size': 16, 'color': "#94A3B8"}},
         gauge={
             'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#475569"},
             'bar': {'color': color, 'thickness': 0.3},
@@ -239,42 +230,6 @@ def create_probability_bar_chart(probabilities: dict):
     return fig
 
 
-def render_voice_diagnosis_button(text_to_speak: str):
-    """Embeds HTML5 Web Speech API for real-time audible medical voice readouts."""
-    safe_text = text_to_speak.replace('"', '\\"').replace('\n', ' ')
-    speech_html = f"""
-    <script>
-        function speakDiagnosis() {{
-            if ('speechSynthesis' in window) {{
-                window.speechSynthesis.cancel();
-                var msg = new SpeechSynthesisUtterance("{safe_text}");
-                msg.rate = 0.95;
-                msg.pitch = 1.0;
-                window.speechSynthesis.speak(msg);
-            }} else {{
-                alert("Speech Synthesis not supported by this browser.");
-            }}
-        }}
-    </script>
-    <button onclick="speakDiagnosis()" style="
-        background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
-        border: 1px solid #38BDF8;
-        color: white;
-        font-weight: 700;
-        padding: 9px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        transition: all 0.2s;
-        margin-top: 8px;
-    ">
-        🔊 Listen to AI Clinical Voice Diagnosis
-    </button>
-    """
-    components.html(speech_html, height=52)
-
-
 def main():
     logo_b64 = get_logo_base64()
 
@@ -284,7 +239,7 @@ def main():
         <div style="text-align: center; margin-bottom: 16px;">
             <img src="data:image/png;base64,{logo_b64}" width="140" style="border-radius: 50%; border: 3px solid #38BDF8; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); margin-bottom: 8px;"/>
             <h2 style="margin-top: 4px; font-weight: 800; color: #38BDF8; font-size: 1.35rem; letter-spacing: -0.5px;">X-Ray AI Engine</h2>
-            <p style="font-size: 0.82rem; color: #94A3B8; margin: 0;">Clinical Radiology Vision Platform</p>
+            <p style="font-size: 0.82rem; color: #94A3B8; margin: 0;">Bone Fracture Deep Learning</p>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -296,24 +251,16 @@ def main():
         """, unsafe_allow_html=True)
 
     st.sidebar.markdown("---")
-    st.sidebar.subheader("🎛️ Grad-CAM & Heatmap Controls")
+    st.sidebar.subheader("🎛️ Visual & AI Controls")
     
     colormap_choice = st.sidebar.selectbox(
-        "Thermal Colormap Palette:",
+        "Grad-CAM Colormap:",
         list(COLORMAP_DICT.keys()),
         index=1
     )
     alpha_slider = st.sidebar.slider("Heatmap Opacity (Alpha)", 0.1, 0.9, 0.45, 0.05)
     cam_threshold = st.sidebar.slider("ROI Fracture Threshold", 0.10, 0.60, 0.25, 0.05)
     enhance_contrast = st.sidebar.toggle("CLAHE Radiopacity Enhancement", value=True)
-
-    # PACS Radiology Workbench Controls in Sidebar
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🔬 PACS Radiologist Console")
-    invert_negative = st.sidebar.toggle("Invert / Negative Radiograph View", value=False)
-    pacs_brightness = st.sidebar.slider("Window Level (Brightness)", 0.5, 1.8, 1.0, 0.05)
-    pacs_contrast = st.sidebar.slider("Window Width (Contrast)", 0.5, 2.2, 1.0, 0.05)
-    pacs_sharpness = st.sidebar.slider("Edge Detail / Sharpness", 0.5, 3.0, 1.0, 0.1)
 
     # Model status badge in sidebar
     model_path = "models/best_model.pth"
@@ -344,7 +291,7 @@ def main():
             <img src="data:image/png;base64,{logo_b64}" width="100" style="border-radius: 50%; border: 3px solid #38BDF8; box-shadow: 0 0 25px rgba(56, 189, 248, 0.5); flex-shrink: 0;"/>
             <div>
                 <h1 class="hero-title">🩻 Bone Fracture Detection — X-Ray AI Engine</h1>
-                <div class="hero-subtitle">Advanced Clinical Vision Platform with PACS Image Processing, Grad-CAM Explainability & Official Reporting</div>
+                <div class="hero-subtitle">High-Precision Deep Learning for Bone Fracture Detection with Explainable Grad-CAM Attention</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -352,7 +299,7 @@ def main():
         st.markdown("""
         <div class="hero-container">
             <h1 class="hero-title">🩻 X-Ray AI Engine Studio</h1>
-            <div class="hero-subtitle">Advanced Clinical Vision Platform with PACS Image Processing, Grad-CAM Explainability & Official Reporting</div>
+            <div class="hero-subtitle">High-Precision Deep Learning for Bone Fracture Detection with Explainable Grad-CAM Attention</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -370,7 +317,7 @@ def main():
 
         with col_left:
             st.markdown("### 1. Select Radiograph")
-            input_mode = st.radio("Source Mode:", ["Upload Scan", "Preset Clinical Scans"], horizontal=True)
+            input_mode = st.radio("Source Mode:", ["Upload Scan", "Preset Demo Scans"], horizontal=True)
 
             selected_image = None
             sample_name = "custom_upload.png"
@@ -391,24 +338,13 @@ def main():
                         sample_name = chosen_sample
 
             if selected_image is not None:
-                # Apply PACS adjustments live
-                img_np_raw = np.array(selected_image.convert("RGB"))
-                img_np_pacs = adjust_radiograph_properties(
-                    img_np_raw,
-                    brightness=pacs_brightness,
-                    contrast=pacs_contrast,
-                    sharpness=pacs_sharpness,
-                    invert=invert_negative
-                )
-                selected_image = Image.fromarray(img_np_pacs)
-
-                st.image(selected_image, caption=f"Scan: {sample_name} (PACS Adjusted)", use_container_width=True)
+                st.image(selected_image, caption=f"Scan: {sample_name}", use_container_width=True)
                 run_btn = st.button("⚡ Run AI Diagnostic Scan", type="primary", use_container_width=True)
             else:
                 run_btn = False
 
         with col_right:
-            st.markdown("### 2. Comprehensive AI Diagnosis & Triage")
+            st.markdown("### 2. Comprehensive AI Diagnosis")
 
             if predictor is None:
                 st.warning("Please click 'Auto-Initialize Demo Model' in the sidebar to activate the AI engine.")
@@ -433,36 +369,21 @@ def main():
                     <div class="badge-normal">
                         ✨ NORMAL / HEALTHY — NO FRACTURE DETECTED ({conf_pct:.1f}% Confidence)
                     </div>
-                    <div class="happy-box" style="margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="margin:0; font-size: 1.15rem; color: #A7F3D0;">🎉 Clean & Intact Bone Architecture</h4>
-                                <p style="margin: 4px 0 0 0; font-size: 0.92rem;">0 suspicious cortical disruption zones detected. Intact osseous cortex throughout.</p>
-                            </div>
-                            <span class="triage-tag-routine">PRIORITY: ROUTINE (LEVEL 5)</span>
-                        </div>
+                    <div class="happy-box">
+                        <h4 style="margin:0; font-size: 1.15rem; color: #A7F3D0;">🎉 Great News! Clean & Intact Bone Architecture</h4>
+                        <p style="margin: 6px 0 0 0; font-size: 0.92rem;">The neural vision network scanned all cortical margins and found <b>0 suspicious fracture lines</b>. Osseous integrity is continuous and healthy!</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    voice_msg = f"Diagnostic Result: Normal radiograph. No bone fracture detected with {conf_pct:.1f} percent confidence."
                 else:
                     st.markdown(f"""
                     <div class="badge-fractured">
                         🚨 SUSPECTED FRACTURE DETECTED ({conf_pct:.1f}% Confidence)
                     </div>
-                    <div class="alert-box" style="margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="margin:0; font-size: 1.15rem; color: #FECACA;">⚠️ Orthopedic Triage Alert</h4>
-                                <p style="margin: 4px 0 0 0; font-size: 0.92rem;">Suspicious cortical discontinuity localized in {len(results['bounding_boxes'])} anatomical zone(s).</p>
-                            </div>
-                            <span class="triage-tag-urgent">PRIORITY: EMERGENT (LEVEL 2)</span>
-                        </div>
+                    <div class="alert-box">
+                        <h4 style="margin:0; font-size: 1.15rem; color: #FECACA;">⚠️ Orthopedic Triage Alert</h4>
+                        <p style="margin: 6px 0 0 0; font-size: 0.92rem;">Suspicious cortical discontinuity localized in {len(results['bounding_boxes'])} anatomical zone(s). Immediate orthopedic specialist consultation recommended.</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    voice_msg = f"Clinical Alert: Suspected bone fracture detected with {conf_pct:.1f} percent confidence. Orthopedic triage review recommended."
-
-                # Audio Voice Readout Button
-                render_voice_diagnosis_button(voice_msg)
 
                 st.write("")
 
@@ -474,18 +395,7 @@ def main():
                     st.plotly_chart(create_probability_bar_chart(results["probabilities"]), use_container_width=True)
 
                 st.markdown("---")
-
-                # Interactive Before/After Split Slider
-                st.markdown("### 🎚️ Interactive Before / After Radiograph Split Comparison")
-                st.caption("Drag the glowing cyan handle horizontally to reveal the AI Grad-CAM attention heatmap directly over the raw radiograph:")
-
-                raw_b64 = pil_to_base64(results["original_image"])
-                overlay_b64 = pil_to_base64(results["gradcam_overlay"])
-                slider_html = get_image_comparison_slider_html(raw_b64, overlay_b64)
-                components.html(slider_html, height=400)
-
-                st.markdown("---")
-                st.markdown("### 🔬 4-Panel Clinical Radiographic Grid")
+                st.markdown("### 🔬 4-Panel Medical Explainability Studio")
 
                 p1, p2 = st.columns(2)
                 with p1:
@@ -503,55 +413,32 @@ def main():
                     st.markdown("**4. Holographic Fracture Localization ROI**")
                     st.image(results["localized_image"], use_container_width=True)
 
-                # Suspicious ROI Hotspot Coordinate Table
-                if results["bounding_boxes"]:
-                    st.markdown("---")
-                    st.markdown("#### 🎯 Localized Fracture Hotspots (ROI Breakdown)")
-                    roi_data = []
-                    for idx, box in enumerate(results["bounding_boxes"], 1):
-                        roi_data.append({
-                            "ROI ID": f"Zone #{idx}",
-                            "X Pixel": box["x"],
-                            "Y Pixel": box["y"],
-                            "Width (px)": box["w"],
-                            "Height (px)": box["h"],
-                            "Area (px²)": box["w"] * box["h"],
-                            "Attention Intensity": f"{int(box['activation']*100)}%"
-                        })
-                    st.dataframe(pd.DataFrame(roi_data), use_container_width=True)
-
-                # Official Patient Demographics & Printable Medical PDF Certificate
+                # Patient Diagnostic Certificate
                 st.markdown("---")
-                st.markdown("### 🏥 Official Clinical Report & Printable PDF")
-
-                with st.expander("📝 Fill Patient Demographics for Official PDF", expanded=False):
-                    c_pt1, c_pt2, c_pt3 = st.columns(3)
-                    with c_pt1:
-                        p_name = st.text_input("Patient Name", value="Jane Doe")
-                        p_age = st.text_input("Patient Age", value="34")
-                    with c_pt2:
-                        p_gender = st.selectbox("Gender", ["Female", "Male", "Other"], index=0)
-                        p_mrn = st.text_input("Medical Record Number (MRN)", value=f"MRN-{random.randint(100000, 999999)}")
-                    with c_pt3:
-                        p_body = st.text_input("Anatomical Region", value="Right Wrist / Forearm (AP/Lateral)")
-                        p_doc = st.text_input("Referring Physician", value="Dr. A. Sharma, MD (Orthopedics)")
-
-                # Generate Hospital HTML Certificate
-                report_html = generate_printable_hospital_report_html(
-                    patient_name=p_name if 'p_name' in locals() else "Patient",
-                    patient_age=p_age if 'p_age' in locals() else "34",
-                    patient_gender=p_gender if 'p_gender' in locals() else "Female",
-                    mrn_id=p_mrn if 'p_mrn' in locals() else "MRN-100234",
-                    body_part=p_body if 'p_body' in locals() else "Radiographic Study",
-                    referring_physician=p_doc if 'p_doc' in locals() else "Dr. Sharma",
-                    results=results,
-                    logo_b64=logo_b64
-                )
-                components.html(report_html, height=520, scrolling=True)
+                st.markdown(f"""
+                <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 12px;">
+                        <div>
+                            <span style="color: #38BDF8; font-weight: 700; font-size: 1.1rem;">🏥 CLINICAL DECISION SUPPORT CERTIFICATE</span><br/>
+                            <span style="color: #94A3B8; font-size: 0.8rem;">REF: XRAY-AI-{random.randint(100000, 999999)}</span>
+                        </div>
+                        <div style="text-align: right; color: #94A3B8; font-size: 0.85rem;">
+                            Date: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}<br/>
+                            Engine: {results['architecture'].upper()}
+                        </div>
+                    </div>
+                    <div style="color: #E2E8F0; font-size: 0.92rem; line-height: 1.6;">
+                        • <b>Finding:</b> <span style="color: {'#EF4444' if is_fx else '#10B981'}; font-weight: 700;">{results['prediction'].upper()}</span><br/>
+                        • <b>Confidence Score:</b> {conf_pct:.2f}%<br/>
+                        • <b>Identified Hotspots:</b> {len(results['bounding_boxes'])} Suspicious Disruption Area(s)<br/>
+                        • <b>Explainability Engine:</b> Gradient-weighted Class Activation Mapping (Grad-CAM)
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 st.write("")
                 st.download_button(
-                    label="📥 Download Diagnostic Certificate (Markdown)",
+                    label="📥 Download Clinical Diagnostic Certificate (Markdown)",
                     data=results["report"],
                     file_name=f"bone_fracture_diagnosis_{sample_name.replace('.png', '')}.md",
                     mime="text/markdown",
